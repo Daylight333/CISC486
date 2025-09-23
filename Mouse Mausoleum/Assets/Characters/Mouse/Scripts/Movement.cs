@@ -3,7 +3,7 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     [SerializeField] float speed = 2.0f;
-    private Rigidbody rb;
+    public Rigidbody rb;
     private float movex = 0f;
     private float movez = 0f;
     private Vector3 move = new Vector3(0,0,0);
@@ -11,7 +11,7 @@ public class Movement : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        
     }
 
     // Update is called once per frame
