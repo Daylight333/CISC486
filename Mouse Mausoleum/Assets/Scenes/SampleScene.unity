@@ -446,6 +446,7 @@ GameObject:
   - component: {fileID: 469956930}
   - component: {fileID: 469956929}
   - component: {fileID: 469956934}
+  - component: {fileID: 469956935}
   m_Layer: 0
   m_Name: Mouse
   m_TagString: Untagged
@@ -588,6 +589,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   speed: 2
   rb: {fileID: 469956929}
+--- !u!114 &469956935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 469956928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d73becf9814f41cc90278315fa2a718, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MouseCamera
+  turn: {x: 0, y: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -649,6 +663,7 @@ GameObject:
   - component: {fileID: 1256520122}
   - component: {fileID: 1256520121}
   - component: {fileID: 1256520120}
+  - component: {fileID: 1256520124}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -749,6 +764,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1256520124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1256520119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d73becf9814f41cc90278315fa2a718, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MouseCamera
+  turn: {x: 0, y: 0}
 --- !u!1 &1383488719
 GameObject:
   m_ObjectHideFlags: 0
