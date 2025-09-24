@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class FSM
 {
-    private Action activeState;
+    public Action activeState;
 
     public void Update()
     {
