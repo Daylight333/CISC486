@@ -62,6 +62,9 @@ public class CatStates : MonoBehaviour
             previousDir = -previousDir;
             return previousDir; 
         }
+        // If we could not find a new direction then just go back the way you came.
+            previousDir = -previousDir;
+            return previousDir; 
     }
 
     public void patrol(){
