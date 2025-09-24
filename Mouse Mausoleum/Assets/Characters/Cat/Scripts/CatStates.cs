@@ -24,8 +24,10 @@ public class CatStates : MonoBehaviour
 
     private void FixedUpdate()
     {
+
         rb.MovePosition(rb.position + dir * moveSpeed * Time.deltaTime);
     }
+
 
     public void patrol(){
         timer += Time.deltaTime;
