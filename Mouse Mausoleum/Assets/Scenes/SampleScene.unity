@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 17986100}
   - component: {fileID: 17986099}
   - component: {fileID: 17986098}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 298728250}
   - component: {fileID: 298728249}
   - component: {fileID: 298728248}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -809,7 +809,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 924da8a6b8ca703479cc82610f629a7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  speed: 2
+  speed: 5
   rb: {fileID: 469956929}
 --- !u!114 &469956935
 MonoBehaviour:
@@ -836,7 +836,7 @@ GameObject:
   - component: {fileID: 718912705}
   - component: {fileID: 718912704}
   - component: {fileID: 718912703}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -996,7 +996,7 @@ GameObject:
   - component: {fileID: 1157498957}
   - component: {fileID: 1157498956}
   - component: {fileID: 1157498955}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1107,7 +1107,7 @@ GameObject:
   - component: {fileID: 1256520122}
   - component: {fileID: 1256520121}
   - component: {fileID: 1256520120}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1219,7 +1219,7 @@ GameObject:
   - component: {fileID: 1344411471}
   - component: {fileID: 1344411470}
   - component: {fileID: 1344411469}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1379,6 +1379,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   rb: {fileID: 1383488720}
+  mouse: {fileID: 469956933}
 --- !u!135 &1383488722
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1389,7 +1390,7 @@ SphereCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1483,7 +1484,7 @@ GameObject:
   - component: {fileID: 1651628018}
   - component: {fileID: 1651628017}
   - component: {fileID: 1651628016}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1594,7 +1595,7 @@ GameObject:
   - component: {fileID: 1665604753}
   - component: {fileID: 1665604752}
   - component: {fileID: 1665604751}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1777,7 +1778,7 @@ GameObject:
   - component: {fileID: 1868644115}
   - component: {fileID: 1868644114}
   - component: {fileID: 1868644113}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wall (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
