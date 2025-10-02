@@ -14,8 +14,11 @@ public class CatStates : MonoBehaviour
     private float actualMoveSpeed;
     private float patrolMoveSpeed = 3f;
     private float seekMoveSpeed = 1.5f;
-    private float chaseMoveSpeed = 5f;
+    private float chaseMoveSpeed = 10f;
     private float attackMoveSpeed = 4f;
+
+    private float chaseTimer = 10f;
+    private bool isChaseTimerSet = false;
 
 
     private Vector3 dir;
@@ -145,6 +148,48 @@ public class CatStates : MonoBehaviour
 
     public void chase(){
         
+        // if the timer isn't set 
+        if (!isChaseTimerSet) {
+            
+            // every second
+            if (movementTimer >= 1f){
+                movementTimer = 0f;
+                
+                // Take the mouse direction and determine if we need to set timer
+                Vector3 mouseDirection = (mouse.position - transform.position).normalized;
+                if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance)){
+                    if (hit.collider.transform != mouse){
+                        isChaseTimerSet = true;  
+                    }
+                }
+                // Set cat direction to mouse and increase movement speed
+                dir = mouseDirection;
+                actualMoveSpeed = chaseMoveSpeed;
+            } 
+        }
+
+        // If we have a timer set already 
+        else {
+
+            // Decrease the timer each second 
+            chaseTimer -= Time.deltaTime;
+
+            // when the timer finishes change state to patrol, reset our timer
+            if (chaseTimer <= 0f){
+                isChaseTimerSet = false;
+                chaseTimer = 10f;
+                controller.setState(patrol);
+            }
+ 
+            // if the timer is still going, keep tailing the mouse every second 
+            if (movementTimer >= 1f){
+                movementTimer = 0f;
+                //Get the mouse direction and set cat direction to mouse direction 
+                Vector3 mouseDirection = (mouse.position - transform.position).normalized;
+                dir = mouseDirection;
+            }
+        }
+
     }
 
     public void attack(){
