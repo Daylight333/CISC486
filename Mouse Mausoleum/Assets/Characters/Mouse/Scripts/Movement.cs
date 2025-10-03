@@ -32,11 +32,11 @@ public class Movement : MonoBehaviour
         horizontal = Input.GetAxis("Horizontal");
 
         // W/S or Up/Down arrows
-        vertical   = Input.GetAxis("Vertical");
+        vertical = Input.GetAxis("Vertical");
 
         // Get camera forward and right directions (flattened to XZ plane)
         camForward = new Vector3(virtualCamera.forward.x, 0, virtualCamera.forward.z).normalized;
-        camRight   = new Vector3(virtualCamera.right.x, 0, virtualCamera.right.z).normalized;
+        camRight = new Vector3(virtualCamera.right.x, 0, virtualCamera.right.z).normalized;
 
         // Combine input with camera directions
         moveDir = (camForward * vertical + camRight * horizontal).normalized;
