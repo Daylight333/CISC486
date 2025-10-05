@@ -8,32 +8,38 @@ public class CatStates : MonoBehaviour
     private FSM controller = new FSM();
     private float distanceRay = 4f;
     private float seekTimer;
+    private float attackTimer;
+    private float backOffTimer;
     private float movementTimer;
     private float randomness = 0.75f;
+    private float mouseDistance;
 
     private float actualMoveSpeed;
     private float patrolMoveSpeed = 3f;
     private float seekMoveSpeed = 1.5f;
     private float chaseMoveSpeed = 5f;
-    private float attackMoveSpeed = 4f;
+    private float attackMoveSpeed = 8f;
 
     private float chaseTimer;
 
 
     private Vector3 dir;
     private Vector3 previousDir;
+    private Vector3 mouseDirection;
     List<Vector3> possibleDir = new List<Vector3> {Vector3.forward, Vector3.back, Vector3.left, Vector3.right};
 
     public Rigidbody rb;
 
     public Transform mouse;
+    public GameObject mouseObj;
     private float seekDistance = 25f;
     private float seekDistanceSqr; // This needs to be the sqaure of the distance you want to check, so I'm checking 15
 
     private float chaseDistance = 10f;
     private float chaseDistanceSqr; // This needs to be the sqaure of the distance you want to check, so I'm checking 15
 
-    private Vector3 mouseDirection;
+    private float attackDistance = 5f;
+    private float collisionDistance = 1f;
     private bool mouseHit;
     
     void Start(){
@@ -115,7 +121,7 @@ public class CatStates : MonoBehaviour
                 Debug.Log("Pausing 2");
                 return secondaryDir.normalized;
             }
-        } else if (controller.activeState == (Action)chase){
+        } else if (controller.activeState == (Action)chase || controller.activeState == (Action)attack){
             // If we can see the mouse then go towards the mouse
             mouseDirection = (mouse.position - transform.position).normalized;
             mouseHit = Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit);
@@ -149,7 +155,11 @@ public class CatStates : MonoBehaviour
                     return secondaryDir.normalized;
                 }
             }
+        } else if (controller.activeState == (Action)backOff ) {
+            mouseDirection = (mouse.position - transform.position).normalized;
+            return (mouseDirection * -1);
         }
+
         // If we could not find a new direction then just go back
         Debug.Log("Going back");
         previousDir = -previousDir;
@@ -222,6 +232,10 @@ public class CatStates : MonoBehaviour
         } else {
             Debug.Log("Chasing!");
             chaseTimer = 0f;
+            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, attackDistance)){
+                actualMoveSpeed = attackMoveSpeed;
+                controller.setState(attack);
+            }
         }
         // when the timer finishes change state to patrol, reset our timer
         if (chaseTimer >= 5f){
@@ -238,5 +252,40 @@ public class CatStates : MonoBehaviour
 
     public void attack(){
         
+        // Recalculate mouse direction and see if mouse is in attack range 
+        mouseDirection = (mouse.position - transform.position).normalized;
+        dir = newDirection();
+
+        //check for collision with the mouse 
+        if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, collisionDistance)){
+            Debug.Log(hitMouse.distance);
+            attackTimer = 0f;
+            mouseObj.GetComponent<Health>().loseHealth();
+            controller.setState(backOff);
+        }
+        else{
+            attackTimer += Time.deltaTime;
+            if (attackTimer >= 3f){
+                actualMoveSpeed = chaseMoveSpeed;
+                controller.setState(chase);
+                dir = newDirection();
+            }
+        }
+    }
+    
+    public void backOff(){
+        // Move backwards 
+        dir = newDirection();
+        backOffTimer += Time.deltaTime;
+
+        // Pause the cat
+        if (backOffTimer >= 1f){
+            actualMoveSpeed = 0f;
+            if (backOffTimer >= 3f){
+                actualMoveSpeed = attackMoveSpeed;
+                controller.setState(attack);
+            }
+        }
+
     }
 }
