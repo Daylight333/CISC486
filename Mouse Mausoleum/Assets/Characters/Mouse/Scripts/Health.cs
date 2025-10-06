@@ -10,12 +10,20 @@ public class Health : MonoBehaviour
         health = 3;
     }
 
+    // Make sure the game ends when the mouse dies
+    public void Update(){
+        Debug.Log(health);
+        if (health <= 0f){
+            Destroy(gameObject);
+        }
+    }
+
     public int getHealth(){
         return health;
     }
 
     public void loseHealth(){
-        this.health -= 1;
+        this.health -= 3;
     }
 
     public void gainHealth(){

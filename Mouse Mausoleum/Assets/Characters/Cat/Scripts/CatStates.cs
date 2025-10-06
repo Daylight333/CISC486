@@ -66,6 +66,10 @@ public class CatStates : MonoBehaviour
         // Update FSM
         controller.Update();
         
+        if (mouse == null){
+            controller.setState(patrol);
+            actualMoveSpeed = patrolMoveSpeed;
+        }
     }
 
     private void FixedUpdate(){
@@ -156,6 +160,7 @@ public class CatStates : MonoBehaviour
                 }
             }
         } else if (controller.activeState == (Action)backOff ) {
+            Debug.Log("Backing it up");
             mouseDirection = (mouse.position - transform.position).normalized;
             return (mouseDirection * -1);
         }
@@ -168,13 +173,15 @@ public class CatStates : MonoBehaviour
 
     public void patrol(){
         Debug.Log("Patroling!");
-        if ((mouse.position - transform.position).sqrMagnitude <= seekDistanceSqr){
-            mouseDirection = (mouse.position - transform.position).normalized;
-            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance)){
-                if (hit.collider.transform == mouse){
-                    controller.setState(seek);
-                    actualMoveSpeed = seekMoveSpeed;
-                    dir = newDirection();
+        if (mouse != null){
+            if ((mouse.position - transform.position).sqrMagnitude <= seekDistanceSqr){
+                mouseDirection = (mouse.position - transform.position).normalized;
+                if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance)){
+                    if (hit.collider.transform == mouse){
+                        controller.setState(seek);
+                        actualMoveSpeed = seekMoveSpeed;
+                        dir = newDirection();
+                    }
                 }
             }
         }
@@ -253,17 +260,28 @@ public class CatStates : MonoBehaviour
     public void attack(){
         
         // Recalculate mouse direction and see if mouse is in attack range 
+        
         mouseDirection = (mouse.position - transform.position).normalized;
+        
         dir = newDirection();
 
         //check for collision with the mouse 
         if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, collisionDistance)){
-            Debug.Log(hitMouse.distance);
             attackTimer = 0f;
             mouseObj.GetComponent<Health>().loseHealth();
             controller.setState(backOff);
+            backOffTimer = 0f;
+            actualMoveSpeed = patrolMoveSpeed;
         }
         else{
+            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitWall, collisionDistance)){
+                if (hitWall.collider.transform != mouse){
+                    chaseTimer = 0f;
+                    controller.setState(seek);
+                    actualMoveSpeed = seekMoveSpeed;
+                    dir = newDirection();
+                }
+            }
             attackTimer += Time.deltaTime;
             if (attackTimer >= 3f){
                 actualMoveSpeed = chaseMoveSpeed;
@@ -274,6 +292,11 @@ public class CatStates : MonoBehaviour
     }
     
     public void backOff(){
+        if (mouse == null){
+            controller.setState(patrol);
+            actualMoveSpeed = patrolMoveSpeed;
+        }
+        Debug.Log("Backing it up");
         // Move backwards 
         dir = newDirection();
         backOffTimer += Time.deltaTime;
@@ -284,8 +307,8 @@ public class CatStates : MonoBehaviour
             if (backOffTimer >= 3f){
                 actualMoveSpeed = attackMoveSpeed;
                 controller.setState(attack);
+                backOffTimer = 0f;
             }
         }
-
     }
 }
