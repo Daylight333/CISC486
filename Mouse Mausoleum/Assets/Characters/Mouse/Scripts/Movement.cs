@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    [SerializeField] float speed = 2.0f;
+    [SerializeField] float speed = 2.0f; // Make this serialized just to see the field in unity to mess around with values
     public Rigidbody rb;
     private Vector3 moveDir = new Vector3(0,0,0);
     private Vector3 viewCamDir;
