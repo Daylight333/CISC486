@@ -1,3 +1,4 @@
 # CISC486
 
-\section{Cat AI FSM}
+Cat AI FSM
+![alt text](Cat-FSM.png)
