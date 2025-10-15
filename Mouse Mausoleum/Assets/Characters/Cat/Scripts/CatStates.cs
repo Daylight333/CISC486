@@ -6,11 +6,15 @@ using UnityEngine.AI;
 
 public class CatStates : MonoBehaviour
 {
-    // FSM, Rigid Body, and basic wall check distance
+    // FSM, Rigid Body, and basic patroling
     private FSM controller = new FSM();
     public Rigidbody rb;
-    private float distanceRay = 4f;
-    
+    public Transform[] checkPoints;
+    private int destPoint = 0;
+    private bool hasBackedOff = false;
+    int checkpointLayer;
+    int layerMask;
+
     // Timers for various states
     private float seekTimer;
     private float attackTimer;
@@ -25,14 +29,12 @@ public class CatStates : MonoBehaviour
     private float attackMoveSpeed = 8f;
 
     // Direction vectors, and info for the mouse
-    private Vector3 dir;
-    private Vector3 previousDir;
     private Vector3 mouseDirection;
-    List<Vector3> possibleDir = new List<Vector3> {Vector3.forward, Vector3.back, Vector3.left, Vector3.right};
-    private float mouseDistance;
     public Transform mouse;
     public GameObject mouseObj;
     private bool mouseHit;
+    private Vector3 swayAngle;
+    private Vector3 swayedDirection = new Vector3(0f, 0f, 0f);
 
     // Distances to check for each state
     private float seekDistance = 25f;
@@ -40,20 +42,12 @@ public class CatStates : MonoBehaviour
     private float chaseDistance = 10f;
     private float chaseDistanceSqr;
     private float attackDistance = 5f;
-    private float collisionDistance = 1f;
+    private float collisionDistance = 2f;
 
     public NavMeshAgent agent;
     
     
     void Start(){
-        // Randomize the possible directions to start in, then pick a direction that doesn't have a wall and go
-        List<Vector3> shuffled = possibleDir.OrderBy(x => UnityEngine.Random.value).ToList(); // found this on https://discussions.unity.com/t/clever-way-to-shuffle-a-list-t-in-one-line-of-c-code/535113
-        foreach (Vector3 d in shuffled){
-            if (!Physics.Raycast(transform.position, d, distanceRay)){
-                dir = d;
-                previousDir = -dir;
-            }
-        }
 
         // Set the initial speed, seek distance and chase distance checks
         agent.speed = patrolMoveSpeed;
@@ -62,8 +56,14 @@ public class CatStates : MonoBehaviour
 
         chaseDistanceSqr = chaseDistance * chaseDistance;
 
+        checkpointLayer = LayerMask.NameToLayer("CheckPoint");
+
+        layerMask = ~(1 << checkpointLayer);
+
         // Set the first state as patrolling
         controller.setState(patrol);
+
+        agent.destination = checkPoints[0].position;
     }
 
     private void Update(){
@@ -78,56 +78,45 @@ public class CatStates : MonoBehaviour
     }
 
     private void FixedUpdate(){
-        // Always check for if cat is hitting a wall
-        if (Physics.Raycast(transform.position, dir, distanceRay)){
-            dir = newDirection();
-        }
-        if (controller.activeState == (Action)patrol || controller.activeState == (Action)backOff){
-            agent.SetDestination(dir + transform.position);
-        } else{
-            agent.SetDestination(dir);
-        }
+        movementTimer += Time.deltaTime;
+        newDirection();
+        Debug.Log(agent.destination);
     }
 
-    public Vector3 newDirection(){
+    public void newDirection(){
         // If we are in the patrol state then just randomly choose a direction to go in
         if (controller.activeState == (Action)patrol){
-            Debug.Log("Hi");
-            // Randomize the directions
-            List<Vector3> shuffled = possibleDir.OrderBy(x => UnityEngine.Random.value).ToList();
+            if (agent.remainingDistance < 0.5f){
+                // Choose the next checkpoint in the array as the destination
+                destPoint = (destPoint + 1) % checkPoints.Length;
 
-            // Remove the previous direction from the choices so the cat doesn't bounce back and forth
-            shuffled.Remove(previousDir);
-
-            // Go through to find a direction that doesn't have a wall, and reset previousDir to the new opposite direction
-            foreach (Vector3 d in shuffled){
-                if (!Physics.Raycast(transform.position, d, distanceRay)){
-                    previousDir = -d;
-                    return d;
-                }
+                // Set the cat to go to the currently selected checkpoint
+                agent.destination = checkPoints[destPoint].position;
             }
         } else if (controller.activeState == (Action)seek){
 
             mouseDirection = mouse.position;
 
-            Vector3 swayAngle = new Vector3(UnityEngine.Random.Range(-0.5f, 0.5f), 0f, UnityEngine.Random.Range(0.5f, 0.5f)); // small sway each frame
+            if (movementTimer >= 1f){
+                movementTimer = 0f;
+                swayAngle = new Vector3(UnityEngine.Random.Range(-0.5f, 0.5f), 0f, UnityEngine.Random.Range(0.5f, 0.5f));
+            }
 
-            // Rotate the direction around the Y-axis
-            Vector3 swayedDirection = swayAngle + mouseDirection;
+            swayedDirection = swayAngle + mouseDirection;
 
-            return swayedDirection;
+            agent.destination = swayedDirection;
 
         } else if (controller.activeState == (Action)chase || controller.activeState == (Action)attack){
             // If we can see the mouse then go towards the mouse
-            return mouse.position;
+            agent.destination = mouse.position;
         } else if (controller.activeState == (Action)backOff){
             // If we are backing off to give the mouse some time to react then move backwards
-            mouseDirection = (mouse.position - transform.position).normalized;
-            return (mouseDirection * -1);
+            if (!hasBackedOff){
+                hasBackedOff = true;
+                mouseDirection = (mouse.position - transform.position).normalized;
+                agent.destination = (mouseDirection * -5);
+            }
         }
-        // If we could not find a new direction then just go back
-        previousDir = -previousDir;
-        return previousDir; 
     }
 
     public void patrol(){
@@ -138,11 +127,10 @@ public class CatStates : MonoBehaviour
             // If the mouse is within the seek distance check if its behind a wall, if not then set the state to seek
             if ((mouse.position - transform.position).sqrMagnitude <= seekDistanceSqr){
                 mouseDirection = (mouse.position - transform.position).normalized;
-                if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance)){
+                if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance, layerMask)){
                     if (hit.collider.transform == mouse){
                         controller.setState(seek);
                         agent.speed = seekMoveSpeed;
-                        dir = newDirection();
                     }
                 }
             }
@@ -152,37 +140,27 @@ public class CatStates : MonoBehaviour
     public void seek(){
         Debug.Log("Seek");
 
-        movementTimer += Time.deltaTime;
-
         // Check to see the cat can still see the mouse, if the cat sees a wall or the mouse is too far we start the countdown until the cat goes back to patrol
         mouseDirection = (mouse.position - transform.position).normalized;
-        mouseHit = Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance);
+        mouseHit = Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance, layerMask);
         if (mouseHit == false || hit.collider.transform != mouse){
             seekTimer += Time.deltaTime;
-            dir = newDirection();
         } else {
             seekTimer = 0f;
-        }
-        // If its been a second change direction slightly to add more dynamic movement
-        if (movementTimer >= 1f){
-            dir = newDirection();
-            movementTimer = 0;
         }
         // If the cat has not been able to see the mouse for more than 5 seconds, go back to patrol
         if (seekTimer >= 10f){
             seekTimer = 0f;
             agent.speed = patrolMoveSpeed;
-            controller.setState(patrol);
-            dir = newDirection();   
+            controller.setState(patrol);  
         }
         // If the mouse gets even closer to the cat then the cat starts to chase
         if ((mouse.position - transform.position).sqrMagnitude <= chaseDistanceSqr){
             mouseDirection = (mouse.position - transform.position).normalized;
-            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, seekDistance)){
+            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, seekDistance, layerMask)){
                 if (hitMouse.collider.transform == mouse){
                     controller.setState(chase);
                     agent.speed = chaseMoveSpeed;
-                    dir = newDirection();
                 }
             }
         }
@@ -191,17 +169,14 @@ public class CatStates : MonoBehaviour
     public void chase(){
         Debug.Log("Chase");
 
-        movementTimer += Time.deltaTime;
-
         // Check to see the cat can still see the mouse, if the cat sees a wall or the mouse is too far we start the countdown until the cat goes back to seeking
         mouseDirection = (mouse.position - transform.position).normalized;
-        mouseHit = Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, chaseDistance);
+        mouseHit = Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, chaseDistance, layerMask);
         if (mouseHit == false || hit.collider.transform != mouse){
             chaseTimer += Time.deltaTime;
-            dir = newDirection();
         } else {
             chaseTimer = 0f;
-            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, attackDistance)){
+            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, attackDistance, layerMask)){
                 agent.speed = attackMoveSpeed;
                 controller.setState(attack);
             }
@@ -211,11 +186,6 @@ public class CatStates : MonoBehaviour
             chaseTimer = 0f;
             controller.setState(seek);
             agent.speed = seekMoveSpeed;
-            dir = newDirection();
-        }
-        if (movementTimer >= 1f){
-            dir = newDirection();
-            movementTimer = 0;
         }
     }
 
@@ -224,24 +194,23 @@ public class CatStates : MonoBehaviour
 
         // Recalculate mouse direction and see if mouse is in attack range 
         mouseDirection = (mouse.position - transform.position).normalized;
-        
-        dir = newDirection();
 
         //check for collision with the mouse 
-        if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, collisionDistance)){
-            attackTimer = 0f;
-            mouseObj.GetComponent<Health>().loseHealth();
-            controller.setState(backOff);
-            backOffTimer = 0f;
-            agent.speed = patrolMoveSpeed;
+        if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, collisionDistance, layerMask)){
+            if (hitMouse.collider.transform == mouse){
+                attackTimer = 0f;
+                mouseObj.GetComponent<Health>().loseHealth();
+                controller.setState(backOff);
+                newDirection();
+                agent.speed = patrolMoveSpeed;
+            }
         }
         else{ // If the cat did not collide and the mouse is behind a wall or out of line of sight then go back to seeking
-            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitWall, collisionDistance)){
+            if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitWall, collisionDistance, layerMask)){
                 if (hitWall.collider.transform != mouse){
                     chaseTimer = 0f;
                     controller.setState(seek);
                     agent.speed = seekMoveSpeed;
-                    dir = newDirection();
                 }
             }
             attackTimer += Time.deltaTime;
@@ -249,32 +218,27 @@ public class CatStates : MonoBehaviour
             if (attackTimer >= 3f){
                 agent.speed = chaseMoveSpeed;
                 controller.setState(chase);
-                dir = newDirection();
             }
         }
     }
     
     public void backOff(){
-        Debug.Log("Backoff");//
+        Debug.Log("Backoff");
 
         // This method allows the mouse to respond to a cat attack and potentially get away
         if (mouse == null){ // If mouse is dead, go back to patrol
             controller.setState(patrol);
             agent.speed = patrolMoveSpeed;
         }
-        // Move backwards 
-        dir = newDirection();
         backOffTimer += Time.deltaTime;
 
-        // Pause the cat
-        if (backOffTimer >= 1f){
-            agent.speed = 0f;
-            // After 3 seconds go back to attacking
-            if (backOffTimer >= 3f){
-                agent.speed = attackMoveSpeed;
-                controller.setState(attack);
-                backOffTimer = 0f;
-            }
+        // After 3 seconds go back to attacking
+        if (backOffTimer >= 3f){
+            agent.speed = attackMoveSpeed;
+            controller.setState(attack);
+            hasBackedOff = false;
+            backOffTimer = 0f;
         }
+        
     }
 }
