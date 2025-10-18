@@ -79,8 +79,7 @@ public class CatStates : MonoBehaviour
 
     private void FixedUpdate(){
         movementTimer += Time.deltaTime;
-        newDirection();
-        Debug.Log(agent.destination);
+        newDirection();//
     }
 
     public void newDirection(){
@@ -93,6 +92,7 @@ public class CatStates : MonoBehaviour
                 // Set the cat to go to the currently selected checkpoint
                 agent.destination = checkPoints[destPoint].position;
             }
+            Debug.Log("Heading to: " + destPoint);
         } else if (controller.activeState == (Action)seek){
 
             mouseDirection = mouse.position;
@@ -152,6 +152,7 @@ public class CatStates : MonoBehaviour
         if (seekTimer >= 10f){
             seekTimer = 0f;
             agent.speed = patrolMoveSpeed;
+            agent.destination = checkPoints[destPoint].position;
             controller.setState(patrol);  
         }
         // If the mouse gets even closer to the cat then the cat starts to chase
