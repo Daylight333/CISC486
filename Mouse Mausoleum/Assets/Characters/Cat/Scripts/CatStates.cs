@@ -110,11 +110,12 @@ public class CatStates : MonoBehaviour
             // If we can see the mouse then go towards the mouse
             agent.destination = mouse.position;
         } else if (controller.activeState == (Action)backOff){
+            Debug.Log(agent.destination);
             // If we are backing off to give the mouse some time to react then move backwards
-            if (!hasBackedOff){
+            if (hasBackedOff == false){
                 hasBackedOff = true;
-                mouseDirection = (mouse.position - transform.position).normalized;
-                agent.destination = (mouseDirection * -5);
+                mouseDirection = (transform.position - mouse.position).normalized;
+                agent.destination = transform.position + (mouseDirection * 5f);
             }
         }
     }
@@ -197,13 +198,17 @@ public class CatStates : MonoBehaviour
         mouseDirection = (mouse.position - transform.position).normalized;
 
         //check for collision with the mouse 
-        if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, collisionDistance, layerMask)){
+        if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, 2f, layerMask)){
             if (hitMouse.collider.transform == mouse){
                 attackTimer = 0f;
                 mouseObj.GetComponent<Health>().loseHealth();
+                hasBackedOff = false;
                 controller.setState(backOff);
+                agent.isStopped = true;
+                agent.updateRotation = false;
+                agent.ResetPath();            
+                agent.Warp(agent.transform.position);   
                 newDirection();
-                agent.speed = patrolMoveSpeed;
             }
         }
         else{ // If the cat did not collide and the mouse is behind a wall or out of line of sight then go back to seeking
@@ -230,15 +235,19 @@ public class CatStates : MonoBehaviour
         if (mouse == null){ // If mouse is dead, go back to patrol
             controller.setState(patrol);
             agent.speed = patrolMoveSpeed;
+            agent.updateRotation = true;
         }
         backOffTimer += Time.deltaTime;
 
+        if (backOffTimer >= 2f){
+            agent.speed = 0f;
+        }
         // After 3 seconds go back to attacking
         if (backOffTimer >= 3f){
-            agent.speed = attackMoveSpeed;
+            agent.updateRotation = true;
             controller.setState(attack);
-            hasBackedOff = false;
             backOffTimer = 0f;
+            hasBackedOff = false;
         }
         
     }
