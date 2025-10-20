@@ -1,15 +1,14 @@
 using UnityEngine;
 
-public class Collect : MonoBehaviour {
+public class completeLevel : MonoBehaviour {
     
     public GameObject mouseObject;
     public Renderer rend;
 
     void Start(){
-
-        // Turn the cheese blue
+        // Turn cheese colour to white 
         rend = GetComponent<MeshRenderer>();
-        rend.material.color = Color.blue;
+        rend.material.color = Color.white;
     }
 
     void OnCollisionEnter(Collision cheeseCollide){
@@ -19,8 +18,8 @@ public class Collect : MonoBehaviour {
             gameObject.SetActive(false);
             
         }
-        // Make the mouse gain health
-        mouseObject.GetComponent<Health>().gainHealth();
+        // Stop the game
+        Time.timeScale = 0f;
     }
     
 }
