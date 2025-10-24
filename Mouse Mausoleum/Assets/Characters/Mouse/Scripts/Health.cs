@@ -7,12 +7,11 @@ public class Health : MonoBehaviour
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start(){
-        health = 3;
+        health = 2;
     }
 
     // Make sure the game ends when the mouse dies
     public void Update(){
-        Debug.Log(health);
         if (health <= 0f){
             Destroy(gameObject);
         }
@@ -23,7 +22,7 @@ public class Health : MonoBehaviour
     }
 
     public void loseHealth(){
-        this.health -= 3;
+        this.health -= 1;
     }
 
     public void gainHealth(){
