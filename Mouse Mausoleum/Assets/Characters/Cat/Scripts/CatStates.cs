@@ -9,6 +9,7 @@ public class CatStates : MonoBehaviour
     // FSM, Rigid Body, and basic patroling
     private FSM controller = new FSM();
     public Rigidbody rb;
+    public Animator animator;
     public Transform[] checkPoints;
     private int destPoint = 0;
     private bool hasBackedOff = false;
@@ -61,6 +62,7 @@ public class CatStates : MonoBehaviour
         layerMask = ~(1 << checkpointLayer);
 
         // Set the first state as patrolling
+        animator.Play("TomWalk");
         controller.setState(patrol);
 
         agent.destination = checkPoints[0].position;
@@ -72,6 +74,7 @@ public class CatStates : MonoBehaviour
         
         // Check if the mouse still exists, if its dead then go back to patrol
         if (mouse == null){
+            animator.Play("TomWalk");
             controller.setState(patrol);
             agent.speed = patrolMoveSpeed;
         }
@@ -130,6 +133,7 @@ public class CatStates : MonoBehaviour
                 mouseDirection = (mouse.position - transform.position).normalized;
                 if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance, layerMask)){
                     if (hit.collider.transform == mouse){
+                        animator.Play("TomSeek");
                         controller.setState(seek);
                         agent.speed = seekMoveSpeed;
                     }
@@ -154,6 +158,7 @@ public class CatStates : MonoBehaviour
             seekTimer = 0f;
             agent.speed = patrolMoveSpeed;
             agent.destination = checkPoints[destPoint].position;
+            animator.Play("TomWalk");
             controller.setState(patrol);  
         }
         // If the mouse gets even closer to the cat then the cat starts to chase
@@ -161,6 +166,7 @@ public class CatStates : MonoBehaviour
             mouseDirection = (mouse.position - transform.position).normalized;
             if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, seekDistance, layerMask)){
                 if (hitMouse.collider.transform == mouse){
+                    animator.Play("TomRun");
                     controller.setState(chase);
                     agent.speed = chaseMoveSpeed;
                 }
@@ -186,6 +192,7 @@ public class CatStates : MonoBehaviour
         // when the timer finishes change state to patrol, reset our timer
         if (chaseTimer >= 5f){
             chaseTimer = 0f;
+            animator.Play("TomSeek");
             controller.setState(seek);
             agent.speed = seekMoveSpeed;
         }
@@ -215,6 +222,7 @@ public class CatStates : MonoBehaviour
             if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitWall, collisionDistance, layerMask)){
                 if (hitWall.collider.transform != mouse){
                     chaseTimer = 0f;
+                    animator.Play("TomSeek");
                     controller.setState(seek);
                     agent.speed = seekMoveSpeed;
                 }
@@ -223,6 +231,7 @@ public class CatStates : MonoBehaviour
             // If its been more than three seconds without being close to the mouse go back to chase
             if (attackTimer >= 3f){
                 agent.speed = chaseMoveSpeed;
+                animator.Play("TomRun");
                 controller.setState(chase);
             }
         }
@@ -233,6 +242,7 @@ public class CatStates : MonoBehaviour
 
         // This method allows the mouse to respond to a cat attack and potentially get away
         if (mouse == null){ // If mouse is dead, go back to patrol
+            animator.Play("TomWalk");
             controller.setState(patrol);
             agent.speed = patrolMoveSpeed;
             agent.updateRotation = true;
@@ -245,6 +255,7 @@ public class CatStates : MonoBehaviour
         // After 3 seconds go back to attacking
         if (backOffTimer >= 3f){
             agent.updateRotation = true;
+            animator.Play("TomAttack");
             controller.setState(attack);
             backOffTimer = 0f;
             hasBackedOff = false;
