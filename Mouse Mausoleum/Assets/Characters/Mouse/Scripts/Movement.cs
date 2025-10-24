@@ -43,5 +43,16 @@ public class Movement : MonoBehaviour
 
         // Move player
         rb.MovePosition(rb.position + moveDir * speed * Time.fixedDeltaTime);
+
+        //Rotate Player 
+        if (Input.GetKey(KeyCode.D)){
+            rb.transform.Rotate(0f, 90f, 0f);
+        }
+        if (Input.GetKey(KeyCode.S)){
+            rb.transform.Rotate(0f, 180f, 0f);
+        }
+        if (Input.GetKey(KeyCode.A)){
+            rb.transform.Rotate(0f, 270f, 0f);
+        }
     }
 }
