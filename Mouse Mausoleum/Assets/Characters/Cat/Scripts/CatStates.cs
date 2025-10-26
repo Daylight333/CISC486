@@ -3,12 +3,14 @@ using System.Linq;
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class CatStates : MonoBehaviour
 {
     // FSM, Rigid Body, and basic patroling
     private FSM controller = new FSM();
     public Rigidbody rb;
+    public Animator animator;
     public Transform[] checkPoints;
     private int destPoint = 0;
     private bool hasBackedOff = false;
@@ -19,6 +21,7 @@ public class CatStates : MonoBehaviour
     private float seekTimer;
     private float attackTimer;
     private float backOffTimer;
+    private float attackAnimation;
     private float movementTimer;
     private float chaseTimer;
     
@@ -45,6 +48,8 @@ public class CatStates : MonoBehaviour
     private float collisionDistance = 2f;
 
     public NavMeshAgent agent;
+
+    private bool mouseDead = false;
     
     
     void Start(){
@@ -61,6 +66,7 @@ public class CatStates : MonoBehaviour
         layerMask = ~(1 << checkpointLayer);
 
         // Set the first state as patrolling
+        animator.Play("TomWalk");
         controller.setState(patrol);
 
         agent.destination = checkPoints[0].position;
@@ -71,9 +77,15 @@ public class CatStates : MonoBehaviour
         controller.Update();
         
         // Check if the mouse still exists, if its dead then go back to patrol
-        if (mouse == null){
-            controller.setState(patrol);
-            agent.speed = patrolMoveSpeed;
+        if (mouseDead == false){
+            if (mouse == null){
+                mouseDead = true;
+                controller.setState(patrol);
+                agent.speed = patrolMoveSpeed;
+                animator.CrossFade("TomWalk", 0.1f, 0, 0.5f);
+                agent.updateRotation = true;
+                agent.isStopped = false;
+            }
         }
     }
 
@@ -92,7 +104,6 @@ public class CatStates : MonoBehaviour
                 // Set the cat to go to the currently selected checkpoint
                 agent.destination = checkPoints[destPoint].position;
             }
-            Debug.Log("Heading to: " + destPoint);
         } else if (controller.activeState == (Action)seek){
 
             mouseDirection = mouse.position;
@@ -110,19 +121,20 @@ public class CatStates : MonoBehaviour
             // If we can see the mouse then go towards the mouse
             agent.destination = mouse.position;
         } else if (controller.activeState == (Action)backOff){
-            Debug.Log(agent.destination);
             // If we are backing off to give the mouse some time to react then move backwards
-            if (hasBackedOff == false){
-                hasBackedOff = true;
-                mouseDirection = (transform.position - mouse.position).normalized;
-                agent.destination = transform.position + (mouseDirection * 5f);
+            if (attackAnimation >= 1f){
+                if (hasBackedOff == false){
+                    hasBackedOff = true;
+                    mouseDirection = (transform.position - mouse.position).normalized;
+                    agent.destination = transform.position + (mouseDirection * 5f);
+                }
+            } else {
+                attackAnimation += Time.deltaTime;
             }
         }
     }
 
     public void patrol(){
-        Debug.Log("Patrol");
-
         // Check if the mouse exists
         if (mouse != null){
             // If the mouse is within the seek distance check if its behind a wall, if not then set the state to seek
@@ -130,6 +142,7 @@ public class CatStates : MonoBehaviour
                 mouseDirection = (mouse.position - transform.position).normalized;
                 if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance, layerMask)){
                     if (hit.collider.transform == mouse){
+                        animator.CrossFade("TomSeek", 0.1f, 0, 0.5f);
                         controller.setState(seek);
                         agent.speed = seekMoveSpeed;
                     }
@@ -139,8 +152,6 @@ public class CatStates : MonoBehaviour
     }
 
     public void seek(){
-        Debug.Log("Seek");
-
         // Check to see the cat can still see the mouse, if the cat sees a wall or the mouse is too far we start the countdown until the cat goes back to patrol
         mouseDirection = (mouse.position - transform.position).normalized;
         mouseHit = Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, seekDistance, layerMask);
@@ -154,6 +165,7 @@ public class CatStates : MonoBehaviour
             seekTimer = 0f;
             agent.speed = patrolMoveSpeed;
             agent.destination = checkPoints[destPoint].position;
+            animator.CrossFade("TomWalk", 0.1f, 0, 0.5f);
             controller.setState(patrol);  
         }
         // If the mouse gets even closer to the cat then the cat starts to chase
@@ -161,6 +173,7 @@ public class CatStates : MonoBehaviour
             mouseDirection = (mouse.position - transform.position).normalized;
             if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, seekDistance, layerMask)){
                 if (hitMouse.collider.transform == mouse){
+                    animator.CrossFade("TomRun", 0.1f, 0, 0.5f);
                     controller.setState(chase);
                     agent.speed = chaseMoveSpeed;
                 }
@@ -169,8 +182,6 @@ public class CatStates : MonoBehaviour
     }
 
     public void chase(){
-        Debug.Log("Chase");
-
         // Check to see the cat can still see the mouse, if the cat sees a wall or the mouse is too far we start the countdown until the cat goes back to seeking
         mouseDirection = (mouse.position - transform.position).normalized;
         mouseHit = Physics.Raycast(transform.position, mouseDirection, out RaycastHit hit, chaseDistance, layerMask);
@@ -186,6 +197,7 @@ public class CatStates : MonoBehaviour
         // when the timer finishes change state to patrol, reset our timer
         if (chaseTimer >= 5f){
             chaseTimer = 0f;
+            animator.CrossFade("TomSeek", 0.1f, 0, 0.5f);
             controller.setState(seek);
             agent.speed = seekMoveSpeed;
         }
@@ -201,13 +213,14 @@ public class CatStates : MonoBehaviour
         if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, 2f, layerMask)){
             if (hitMouse.collider.transform == mouse){
                 attackTimer = 0f;
-                mouseObj.GetComponent<Health>().loseHealth();
                 hasBackedOff = false;
                 controller.setState(backOff);
                 agent.isStopped = true;
                 agent.updateRotation = false;
                 agent.ResetPath();            
-                agent.Warp(agent.transform.position);   
+                agent.Warp(agent.transform.position);  //
+                StartCoroutine(waitToDoDamage());
+                attackAnimation = 0f;
                 newDirection();
             }
         }
@@ -215,6 +228,7 @@ public class CatStates : MonoBehaviour
             if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitWall, collisionDistance, layerMask)){
                 if (hitWall.collider.transform != mouse){
                     chaseTimer = 0f;
+                    animator.CrossFade("TomSeek", 0.1f, 0, 0.5f);
                     controller.setState(seek);
                     agent.speed = seekMoveSpeed;
                 }
@@ -223,31 +237,42 @@ public class CatStates : MonoBehaviour
             // If its been more than three seconds without being close to the mouse go back to chase
             if (attackTimer >= 3f){
                 agent.speed = chaseMoveSpeed;
+                animator.CrossFade("TomRun", 0.1f, 0, 0.5f);
                 controller.setState(chase);
             }
         }
     }
-    
+
+    IEnumerator waitToDoDamage(){
+        // Start the animation 40% of the way through because we cannot directly alter the animation clip, so just start when the swing happens
+        animator.CrossFade("TomAttack", 0.1f, 0, 0.4f);
+        // Adjust for the fact that we are starting the animation 40% of the way through
+        float attackAnimationLength = animator.GetCurrentAnimatorClipInfo(0)[0].clip.length * 0.6f;
+        yield return new WaitForSeconds(attackAnimationLength);
+        mouseObj.GetComponent<Health>().loseHealth();
+        backOff();
+    }
+
+    // This method allows the mouse to respond to a cat attack and potentially get away
     public void backOff(){
         Debug.Log("Backoff");
 
-        // This method allows the mouse to respond to a cat attack and potentially get away
-        if (mouse == null){ // If mouse is dead, go back to patrol
-            controller.setState(patrol);
-            agent.speed = patrolMoveSpeed;
-            agent.updateRotation = true;
-        }
+        
         backOffTimer += Time.deltaTime;
 
-        if (backOffTimer >= 2f){
-            agent.speed = 0f;
-        }
-        // After 3 seconds go back to attacking
         if (backOffTimer >= 3f){
+            agent.Warp(agent.transform.position);
+            // PUT IDLE ANIMATION HERE
+        }
+        // After 4 seconds go back to attacking
+        if (backOffTimer >= 4f){
             agent.updateRotation = true;
+            agent.isStopped = false;
             controller.setState(attack);
+            animator.CrossFade("TomRun", 0.1f, 0, 0.5f);
             backOffTimer = 0f;
             hasBackedOff = false;
+            attackAnimation = 0f;
         }
         
     }
