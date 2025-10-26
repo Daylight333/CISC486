@@ -122,7 +122,7 @@ public class CatStates : MonoBehaviour
             agent.destination = mouse.position;
         } else if (controller.activeState == (Action)backOff){
             // If we are backing off to give the mouse some time to react then move backwards
-            if (attackAnimation >= 1f){
+            if (attackAnimation >= 0.5f){
                 if (hasBackedOff == false){
                     hasBackedOff = true;
                     mouseDirection = (transform.position - mouse.position).normalized;
@@ -250,17 +250,24 @@ public class CatStates : MonoBehaviour
         float attackAnimationLength = animator.GetCurrentAnimatorClipInfo(0)[0].clip.length * 0.6f;
         yield return new WaitForSeconds(attackAnimationLength);
         mouseObj.GetComponent<Health>().loseHealth();
+        StartCoroutine(walkingBack());
+    }
+
+    IEnumerator walkingBack(){
+        // Start the animation 40% of the way through because we cannot directly alter the animation clip, so just start when the swing happens
+        animator.CrossFade("TomWalk", 0.1f, 0, 0.4f);
+        yield return new WaitForSeconds(0.5f);
         backOff();
     }
 
     // This method allows the mouse to respond to a cat attack and potentially get away
     public void backOff(){
         Debug.Log("Backoff");
-
+        
         
         backOffTimer += Time.deltaTime;
 
-        if (backOffTimer >= 3f){
+        if (backOffTimer >= 2f){
             agent.Warp(agent.transform.position);
             animator.Play("TomIdle");
         }
