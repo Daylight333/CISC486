@@ -262,7 +262,7 @@ public class CatStates : MonoBehaviour
 
         if (backOffTimer >= 3f){
             agent.Warp(agent.transform.position);
-            // PUT IDLE ANIMATION HERE
+            animator.Play("TomIdle");
         }
         // After 4 seconds go back to attacking
         if (backOffTimer >= 4f){
