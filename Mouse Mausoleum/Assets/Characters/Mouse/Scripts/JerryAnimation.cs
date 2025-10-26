@@ -21,7 +21,6 @@ public class Animation : MonoBehaviour
                 transformMouse.position = new Vector3(transformMouse.position.x,0,transformMouse.position.z);
                 hasMoved = true;
             }
-            
             animator.Play("JerryRun");
         }
         else {
