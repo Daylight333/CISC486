@@ -44,4 +44,9 @@ public class Movement : MonoBehaviour
         // Move player
         rb.MovePosition(rb.position + moveDir * speed * Time.fixedDeltaTime);
     }
+
+    void LateUpdate()
+    {
+        transform.Find("MouseModel").localRotation = Quaternion.identity;
+    }
 }

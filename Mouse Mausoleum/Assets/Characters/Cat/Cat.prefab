@@ -57,8 +57,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  mouse: {fileID: 0}
-  mouseObj: {fileID: 0}
+  mouse: {fileID: 8471064220994070243, guid: d789da7252863f944946dd12b5be9157, type: 3}
+  mouseObj: {fileID: 7629538673425319164, guid: d789da7252863f944946dd12b5be9157, type: 3}
   agent: {fileID: 7513354385815522348}
 --- !u!54 &6551422890056577840
 Rigidbody:
@@ -307,7 +307,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 6ad1978e0814543bfb49bce137e50517, type: 3}
       propertyPath: m_Name
-      value: F17QDUYR41PMXUTH6S2S6ZKP9
+      value: CatModel
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 6ad1978e0814543bfb49bce137e50517, type: 3}
       propertyPath: m_Controller
