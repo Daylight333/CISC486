@@ -182,7 +182,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ca09a39a4836a42a6b229a3613d8f3b8, type: 3}
       propertyPath: m_Name
-      value: TX0X3R7A6815NDO99413UQ8CQ
+      value: MouseModel
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -240,4 +240,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animation
   animator: {fileID: 5271529780383024685}
-  transformMouse: {fileID: 7479543247298887828}
+  transformMouse: {fileID: 8471064220994070243}

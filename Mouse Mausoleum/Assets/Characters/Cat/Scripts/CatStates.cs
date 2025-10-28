@@ -80,6 +80,7 @@ public class CatStates : MonoBehaviour
         if (mouseDead == false){
             if (mouse == null){
                 mouseDead = true;
+                StopAllCoroutines();
                 controller.setState(patrol);
                 agent.speed = patrolMoveSpeed;
                 animator.CrossFade("TomWalk", 0.1f, 0, 0.5f);
@@ -122,14 +123,16 @@ public class CatStates : MonoBehaviour
             agent.destination = mouse.position;
         } else if (controller.activeState == (Action)backOff){
             // If we are backing off to give the mouse some time to react then move backwards
-            if (attackAnimation >= 0.5f){
-                if (hasBackedOff == false){
-                    hasBackedOff = true;
-                    mouseDirection = (transform.position - mouse.position).normalized;
-                    agent.destination = transform.position + (mouseDirection * 5f);
+            if (mouse != null){
+                if (attackAnimation >= 0.5f){
+                    if (hasBackedOff == false){
+                        hasBackedOff = true;
+                        mouseDirection = (transform.position - mouse.position).normalized;
+                        agent.destination = transform.position + (mouseDirection * 5f);
+                    }
+                } else {
+                    attackAnimation += Time.deltaTime;
                 }
-            } else {
-                attackAnimation += Time.deltaTime;
             }
         }
     }
@@ -210,7 +213,7 @@ public class CatStates : MonoBehaviour
         mouseDirection = (mouse.position - transform.position).normalized;
 
         //check for collision with the mouse 
-        if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, 2f, layerMask)){
+        if (Physics.Raycast(transform.position, mouseDirection, out RaycastHit hitMouse, 1.5f, layerMask)){
             if (hitMouse.collider.transform == mouse){
                 attackTimer = 0f;
                 hasBackedOff = false;
@@ -246,9 +249,7 @@ public class CatStates : MonoBehaviour
     IEnumerator waitToDoDamage(){
         // Start the animation 40% of the way through because we cannot directly alter the animation clip, so just start when the swing happens
         animator.CrossFade("TomAttack", 0.1f, 0, 0.4f);
-        // Adjust for the fact that we are starting the animation 40% of the way through
-        float attackAnimationLength = animator.GetCurrentAnimatorClipInfo(0)[0].clip.length * 0.6f;
-        yield return new WaitForSeconds(attackAnimationLength);
+        yield return new WaitForSeconds(0.5f);
         mouseObj.GetComponent<Health>().loseHealth();
         StartCoroutine(walkingBack());
     }
