@@ -4,7 +4,6 @@ public class Animation : MonoBehaviour
 {
     public Animator animator;
     public Transform transformMouse;
-    private float moveVal = 0.7f;
     private bool hasMoved = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
