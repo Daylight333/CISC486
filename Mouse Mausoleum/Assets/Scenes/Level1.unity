@@ -8134,7 +8134,7 @@ GameObject:
   - component: {fileID: 200363799}
   - component: {fileID: 200363798}
   - component: {fileID: 200363797}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Floor (130)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12453,7 +12453,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.10976236, y: -0.55568063, z: 0.07431249, w: 0.8207612}
+  m_LocalRotation: {x: 0.1097698, y: -0.55574137, z: 0.07432961, w: 0.8207176}
   m_LocalPosition: {x: 36.00021, y: 3.880062, z: 36.30043}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -13175,7 +13175,7 @@ GameObject:
   - component: {fileID: 373121927}
   - component: {fileID: 373121926}
   - component: {fileID: 373121925}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Floor (128)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30392,7 +30392,7 @@ GameObject:
   - component: {fileID: 843979168}
   - component: {fileID: 843979167}
   - component: {fileID: 843979166}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Floor (129)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -64784,7 +64784,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1693511853}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.10976235, y: -0.55568063, z: 0.0743125, w: 0.8207612}
+  m_LocalRotation: {x: 0.10976979, y: -0.5557413, z: 0.07432959, w: 0.82071763}
   m_LocalPosition: {x: 36, y: 3.88, z: 35.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -64831,7 +64831,7 @@ MonoBehaviour:
   m_Strategy: 1
   m_MaximumEffort: 4
   m_SmoothingTime: 0
-  m_Damping: 1.45
+  m_Damping: 1.5
   m_DampingWhenOccluded: 0
   m_OptimalTargetDistance: 0
 --- !u!1 &1727605583
@@ -73205,7 +73205,7 @@ GameObject:
   - component: {fileID: 1991856218}
   - component: {fileID: 1991856217}
   - component: {fileID: 1991856216}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Floor (121)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
