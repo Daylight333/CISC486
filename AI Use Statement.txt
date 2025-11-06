@@ -1,0 +1,1 @@
+We used AI to make our Main Menu Screen, End Level Screen, and the Pause Menu. As this is not core to the content being taught in the course we believe it justifiable to use to save time on art for the game, which is not a graded component.
