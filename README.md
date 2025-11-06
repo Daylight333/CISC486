@@ -1,7 +1,10 @@
 # CISC486
 
-https://youtu.be/I1UwzwejKOI
+Assignment Videos:
 
+A2 Video: https://youtu.be/I1UwzwejKOI
+
+A3 Video: https://youtu.be/JpxGCyjaXQU
 
 Cat AI FSM
 ![alt text](Cat-FSM.png)
